@@ -1,5 +1,6 @@
 package com.example.pj4test.audioInference
 
+import android.app.AlertDialog
 import android.content.Context
 import android.media.AudioRecord
 import android.os.Build
@@ -98,6 +99,7 @@ class SnapClassifier {
         Log.d(TAG, tensor.tensorBuffer.shape.joinToString(","))
         val output = classifier.classify(tensor)
         Log.d(TAG, output.toString())
+        Log.d("LogClassifier", output.toString())
 
         return output[0].categories.find { it.label == "Finger snapping" }!!.score
     }
@@ -106,6 +108,8 @@ class SnapClassifier {
         if (task == null) {
             task = Timer().scheduleAtFixedRate(0, REFRESH_INTERVAL_MS) {
                 val score = inference()
+                Log.d("LogClassifier", score.toString())
+
                 detectorListener?.onResults(score)
             }
         }
@@ -149,7 +153,7 @@ class SnapClassifier {
     companion object {
         const val TAG = "HornClassifier"
 
-        const val REFRESH_INTERVAL_MS = 33L
+        const val REFRESH_INTERVAL_MS = 1000L
         const val YAMNET_MODEL = "yamnet_classification.tflite"
 
         const val THRESHOLD = 0.3f

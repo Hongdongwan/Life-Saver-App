@@ -16,6 +16,7 @@
 package com.example.pj4test.fragment
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -35,6 +36,8 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.pj4test.OnDataPassListener
+import com.example.pj4test.OnFaceListener
 import com.example.pj4test.ProjectConfiguration
 import java.util.LinkedList
 import java.util.concurrent.ExecutorService
@@ -45,6 +48,7 @@ import org.tensorflow.lite.task.vision.detector.Detection
 
 class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
     private val TAG = "CameraFragment"
+    private var onFaceListener: OnFaceListener? = null
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
 
@@ -205,6 +209,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
             
             // change UI according to the result
             if (isPersonDetected) {
+                sendDataToActivity(true);
                 personView.text = "PERSON"
                 personView.setBackgroundColor(ProjectConfiguration.activeBackgroundColor)
                 personView.setTextColor(ProjectConfiguration.activeTextColor)
@@ -223,5 +228,18 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        onFaceListener = context as? OnFaceListener
+    }
+
+    private fun sendDataToActivity(data: Boolean) {
+        onFaceListener?.onFaceDataPass(data)
+        Log.d("AudioFragmentSendToActivity", data.toString())
+    }
+    fun setOnDataPassListener(listener: OnFaceListener) {
+        onFaceListener = listener
     }
 }

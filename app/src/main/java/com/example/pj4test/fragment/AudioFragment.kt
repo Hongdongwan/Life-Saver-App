@@ -1,17 +1,23 @@
 package com.example.pj4test.fragment
 
+import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.example.pj4test.OnDataPassListener
 import com.example.pj4test.ProjectConfiguration
 import com.example.pj4test.audioInference.SnapClassifier
 import com.example.pj4test.databinding.FragmentAudioBinding
 
 class AudioFragment: Fragment(), SnapClassifier.DetectorListener {
     private val TAG = "AudioFragment"
+    private var onDataPassListener: OnDataPassListener? = null
+
 
     private var _fragmentAudioBinding: FragmentAudioBinding? = null
 
@@ -57,6 +63,7 @@ class AudioFragment: Fragment(), SnapClassifier.DetectorListener {
     override fun onResults(score: Float) {
         activity?.runOnUiThread {
             if (score > SnapClassifier.THRESHOLD) {
+                sendDataToActivity(score.toString())
                 snapView.text = "SNAP"
                 snapView.setBackgroundColor(ProjectConfiguration.activeBackgroundColor)
                 snapView.setTextColor(ProjectConfiguration.activeTextColor)
@@ -66,5 +73,16 @@ class AudioFragment: Fragment(), SnapClassifier.DetectorListener {
                 snapView.setTextColor(ProjectConfiguration.idleTextColor)
             }
         }
+    }
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        onDataPassListener = context as? OnDataPassListener
+    }
+    private fun sendDataToActivity(data: String) {
+        onDataPassListener?.onDataPass(data)
+        Log.d("AudioFragmentSendToActivity", data)
+    }
+    fun setOnDataPassListener(listener: OnDataPassListener) {
+        onDataPassListener = listener
     }
 }
