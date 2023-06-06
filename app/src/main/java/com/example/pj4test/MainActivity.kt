@@ -10,6 +10,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -28,6 +29,7 @@ import androidx.core.app.ActivityCompat
 import java.util.*
 import android.telephony.SmsManager
 import android.view.View
+import android.widget.Toast
 import com.example.pj4test.fragment.AudioFragment
 import com.example.pj4test.fragment.CameraFragment
 
@@ -57,9 +59,10 @@ class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener, Ac
         Log.d("MainFaceTag222", isHelpNeed.toString())
         if (isHelpNeed) {
             endCam()
-            val phoneNumber = "01073794936" // 112로 해야한다.
+            val phoneNumber = "01042161484" // 112로 해야한다.
             val message = "응급 상황입니다.\n위도 : " + lat.toString() + "\n경도 : " + long.toString()
             sendSMS(phoneNumber, message)
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 
             isHelpNeed = false
             mediaPlayer?.stop()
@@ -182,16 +185,12 @@ class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener, Ac
         val fragment = supportFragmentManager.findFragmentById(R.id.cameraFragmentContainerView)
         if (fragment is CameraFragment) {
             fragment.startSetUpCamera()
-            val cameraFragmentContainerView = findViewById<View>(R.id.cameraFragmentContainerView)
-            cameraFragmentContainerView.visibility = View.VISIBLE
         }
     }
     private fun endCam() {
         val fragment = supportFragmentManager.findFragmentById(R.id.cameraFragmentContainerView)
         if (fragment is CameraFragment) {
             fragment.endCamera()
-            val cameraFragmentContainerView = findViewById<View>(R.id.cameraFragmentContainerView)
-            cameraFragmentContainerView.visibility = View.INVISIBLE
         }
     }
 }

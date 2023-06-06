@@ -101,7 +101,7 @@ class SnapClassifier {
         Log.d(TAG, output.toString())
         Log.d("LogClassifier", output.toString())
 
-        return output[0].categories.find { it.label == "Finger snapping" }!!.score
+        return output[0].categories.find { it.label == "Screaming" }!!.score
     }
 
     fun startInferencing() {
@@ -156,6 +156,6 @@ class SnapClassifier {
         const val REFRESH_INTERVAL_MS = 1000L
         const val YAMNET_MODEL = "yamnet_classification.tflite"
 
-        const val THRESHOLD = 0.2f
+        const val THRESHOLD = 0.01f
     }
 }
