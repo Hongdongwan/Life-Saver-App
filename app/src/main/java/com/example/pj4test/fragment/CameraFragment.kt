@@ -36,6 +36,7 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.pj4test.ActivityToCamera
 import com.example.pj4test.OnDataPassListener
 import com.example.pj4test.OnFaceListener
 import com.example.pj4test.ProjectConfiguration
@@ -47,6 +48,7 @@ import com.example.pj4test.databinding.FragmentCameraBinding
 import org.tensorflow.lite.task.vision.detector.Detection
 
 class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
+    private var activityToCamera: ActivityToCamera? = null
     private val TAG = "CameraFragment"
     private var onFaceListener: OnFaceListener? = null
 
@@ -98,7 +100,7 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
         // Wait for the views to be properly laid out
         fragmentCameraBinding.viewFinder.post {
             // Set up the camera and its use cases
-            setUpCamera()
+            //setUpCamera()
         }
 
         personView = fragmentCameraBinding.PersonView
@@ -210,11 +212,11 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
             // change UI according to the result
             if (isPersonDetected) {
                 sendDataToActivity(true);
-                personView.text = "PERSON"
+                personView.text = "사람 있음"
                 personView.setBackgroundColor(ProjectConfiguration.activeBackgroundColor)
                 personView.setTextColor(ProjectConfiguration.activeTextColor)
             } else {
-                personView.text = "NO PERSON"
+                personView.text = "사람 없음"
                 personView.setBackgroundColor(ProjectConfiguration.idleBackgroundColor)
                 personView.setTextColor(ProjectConfiguration.idleTextColor)
             }
@@ -233,6 +235,32 @@ class CameraFragment : Fragment(), PersonClassifier.DetectorListener {
     override fun onAttach(context: Context) {
         super.onAttach(context)
         onFaceListener = context as? OnFaceListener
+        if (context is ActivityToCamera) {
+            activityToCamera = context
+        }
+    }
+
+    public fun startSetUpCamera() {
+        // Handle the received data
+        setUpCamera()
+    }
+
+    public fun endCamera() {
+        // Handle the received data
+        preview?.setSurfaceProvider(null) // Preview 리소스 해제
+        imageAnalyzer?.clearAnalyzer() // ImageAnalysis 리소스 해제
+
+
+        // CameraProvider 해제
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
+        cameraProviderFuture.addListener({
+            val cameraProvider = cameraProviderFuture.get()
+            cameraProvider.unbindAll() // 카메라 리소스 해제
+        }, ContextCompat.getMainExecutor(requireContext()))
+
+        camera = null // camera 변수 초기화
+        preview = null // preview 변수 초기화
+        imageAnalyzer = null // imageAnalyzer 변수 초기화
     }
 
     private fun sendDataToActivity(data: Boolean) {

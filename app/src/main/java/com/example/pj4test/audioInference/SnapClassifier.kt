@@ -156,6 +156,6 @@ class SnapClassifier {
         const val REFRESH_INTERVAL_MS = 1000L
         const val YAMNET_MODEL = "yamnet_classification.tflite"
 
-        const val THRESHOLD = 0.3f
+        const val THRESHOLD = 0.2f
     }
 }

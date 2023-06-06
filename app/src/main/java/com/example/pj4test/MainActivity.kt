@@ -6,6 +6,7 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.Manifest.permission.CAMERA
 import android.Manifest.permission.RECORD_AUDIO
 import android.Manifest.permission.SEND_SMS
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -26,11 +27,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import java.util.*
 import android.telephony.SmsManager
+import android.view.View
 import com.example.pj4test.fragment.AudioFragment
 import com.example.pj4test.fragment.CameraFragment
 
 
-class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener {
+class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener, ActivityToCamera {
     private val TAG = "MainActivity"
     var mediaPlayer: MediaPlayer? = null
     var isHelpNeed = false;
@@ -40,6 +42,33 @@ class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener {
     private val PERMISSIONS_REQUEST = 0x0000001;
 
     private val delayMillis: Long = 1000 // 주기적으로 실행할 간격 (1초)
+
+    //위도 경도
+    var lat: Double = 0.0;
+    var long: Double = 0.0;
+
+    // audio
+    val handler = Handler(Looper.getMainLooper())
+
+    // Runnable 객체 생성
+    val handleRunnable = Runnable {
+        // 예약된 작업 코드
+
+        Log.d("MainFaceTag222", isHelpNeed.toString())
+        if (isHelpNeed) {
+            endCam()
+            val phoneNumber = "01073794936" // 112로 해야한다.
+            val message = "응급 상황입니다.\n위도 : " + lat.toString() + "\n경도 : " + long.toString()
+            sendSMS(phoneNumber, message)
+
+            isHelpNeed = false
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
+            mediaPlayer = MediaPlayer.create(this, R.raw.min1)
+        }
+
+    }
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,6 +82,8 @@ class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener {
         fragment_audio.setOnDataPassListener(this)
         val fragment_face = CameraFragment()
         fragment_face.setOnDataPassListener(this)
+
+
         //val tt = Intent(Intent.ACTION_CALL, Uri.parse("tel:01073794936"))
         //startActivity(tt)
 
@@ -90,8 +121,6 @@ class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener {
 
          */
         // GPS
-        var lat: Double = 0.0;
-        var long: Double = 0.0;
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         if (ActivityCompat.checkSelfPermission(
@@ -117,39 +146,52 @@ class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener {
             Log.e("Last Location", "Location permission not granted")
         }
 
-
-        // audio
-        val handler = Handler(Looper.getMainLooper())
-
         if (!(mediaPlayer?.isPlaying)!!){
             isHelpNeed = true
             mediaPlayer?.start()
+            startSetUpCam()
             // 1분(60,000 밀리초) 후에 실행되는 코드
-            handler.postDelayed({
-                Log.d("MainFaceTag222", isHelpNeed.toString())
-                if (isHelpNeed) {
-                    val phoneNumber = "01073794936"
-                    val message = "응급 상황입니다.\n위도 : " + lat.toString() + "\n경도 : " + long.toString()
-                    sendSMS(phoneNumber, message)
-
-                    isHelpNeed = false
-                    mediaPlayer?.stop()
-                    mediaPlayer?.release()
-                    mediaPlayer = null
-                    mediaPlayer = MediaPlayer.create(this, R.raw.min1)
-                }
-            }, 60000) // 1분을 밀리초로 표현한 값
+            handler.postDelayed(handleRunnable, 60000) // 1분을 밀리초로 표현한 값
         }
     }
 
     override fun onFaceDataPass(data: Boolean) {
         Log.d("MainFaceTag", data.toString())
         if (data){
+            endCam()
+
+            // 예약된 작업 취소
+            handler.removeCallbacks(handleRunnable)
             isHelpNeed = false
             mediaPlayer?.stop()
             mediaPlayer?.release()
             mediaPlayer = null
             mediaPlayer = MediaPlayer.create(this, R.raw.min1)
+        }
+    }
+
+    override fun onCameraStart(data: Boolean) {
+        // Handle the received data in the Fragment
+
+    }
+    override fun onCameraEnd(data: Boolean) {
+        // Handle the received data in the Fragment
+    }
+
+    private fun startSetUpCam() {
+        val fragment = supportFragmentManager.findFragmentById(R.id.cameraFragmentContainerView)
+        if (fragment is CameraFragment) {
+            fragment.startSetUpCamera()
+            val cameraFragmentContainerView = findViewById<View>(R.id.cameraFragmentContainerView)
+            cameraFragmentContainerView.visibility = View.VISIBLE
+        }
+    }
+    private fun endCam() {
+        val fragment = supportFragmentManager.findFragmentById(R.id.cameraFragmentContainerView)
+        if (fragment is CameraFragment) {
+            fragment.endCamera()
+            val cameraFragmentContainerView = findViewById<View>(R.id.cameraFragmentContainerView)
+            cameraFragmentContainerView.visibility = View.INVISIBLE
         }
     }
 }

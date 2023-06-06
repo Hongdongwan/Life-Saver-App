@@ -64,11 +64,11 @@ class AudioFragment: Fragment(), SnapClassifier.DetectorListener {
         activity?.runOnUiThread {
             if (score > SnapClassifier.THRESHOLD) {
                 sendDataToActivity(score.toString())
-                snapView.text = "SNAP"
+                snapView.text = "비명"
                 snapView.setBackgroundColor(ProjectConfiguration.activeBackgroundColor)
                 snapView.setTextColor(ProjectConfiguration.activeTextColor)
             } else {
-                snapView.text = "NO SNAP"
+                snapView.text = "정상"
                 snapView.setBackgroundColor(ProjectConfiguration.idleBackgroundColor)
                 snapView.setTextColor(ProjectConfiguration.idleTextColor)
             }
