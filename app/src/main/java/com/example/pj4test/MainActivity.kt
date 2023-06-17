@@ -60,9 +60,9 @@ class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener, Ac
         if (isHelpNeed) {
             endCam()
             val phoneNumber = "01042161484" // 112로 해야한다.
-            val message = "응급 상황입니다.\n위도 : " + lat.toString() + "\n경도 : " + long.toString()
+            val message = "응급 상황입니다.\n즉시 출동 바랍니다.\n위도 : " + lat.toString() + "\n경도 : " + long.toString()
             sendSMS(phoneNumber, message)
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "응급 상황 메세지가 119로 전송되었습니다.", Toast.LENGTH_SHORT).show()
 
             isHelpNeed = false
             mediaPlayer?.stop()
@@ -70,7 +70,6 @@ class MainActivity : AppCompatActivity(), OnDataPassListener, OnFaceListener, Ac
             mediaPlayer = null
             mediaPlayer = MediaPlayer.create(this, R.raw.min1)
         }
-
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
